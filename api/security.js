@@ -66,9 +66,10 @@ module.exports = async function handler(req, res) {
       },
       {
         headers: {
-          Authorization: `Bearer ${process.env.OPENAPI_API_KEY}`,
-          "Content-Type": "application/json"
-        }
+  "Content-Type": "application/json",
+  "Authorization": `Bearer ${process.env.OPENAI_API_KEY}`
+}
+
       }
     );
 
