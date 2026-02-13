@@ -1,6 +1,6 @@
-import axios from "axios";
+const axios = require("axios");
 
-export default async function handler(req, res) {
+module.exports = async function handler(req, res) {
   try {
     const metadata = {
       ip: req.headers["x-forwarded-for"] || "unknown",
@@ -11,53 +11,31 @@ export default async function handler(req, res) {
       body: req.body || "none"
     };
 
-    const response = await axios.post(
-      "https://api.beakops.com/v1/chat/completions",   // ✅ Beak API endpoint
+    const beakResponse = await axios.post(
+      "https://YOUR_BEAK_ENDPOINT",
       {
-        model: "gpt-4.1",
-        messages: [
-          {
-            role: "system",
-            content: "You are a backend security agent. Decide ALLOW, REVIEW, or BLOCK."
-          },
-          {
-            role: "user",
-            content: `Analyze this request:\n${JSON.stringify(metadata)}`
-          }
-        ]
+        message: `Analyze this request and decide ALLOW, REVIEW, or BLOCK:\n${JSON.stringify(metadata)}`
       },
       {
         headers: {
-          Authorization: `Bearer ${process.env.BEAK_API_KEY}`,
-          "Content-Type": "application/json"
+          Authorization: `Bearer ${process.env.BEAK_API_KEY}`
         }
       }
     );
 
-    const aiReply = response.data.choices[0].message.content;
-
-    let decision = "ALLOW";
-    if (aiReply.includes("BLOCK")) decision = "BLOCK";
-    else if (aiReply.includes("REVIEW")) decision = "REVIEW";
+    const decision = beakResponse.data.action || "ALLOW";
 
     if (decision === "BLOCK") {
       return res.status(403).json({ message: "Blocked by AI Security Agent" });
     }
 
     return res.status(200).json({
-      message: "Request processed",
-      decision,
-      aiAnalysis: aiReply
+      message: "Request allowed",
+      decision: decision
     });
 
   } catch (error) {
-    console.error(error.response?.data || error.message);
+    console.error(error);
     return res.status(500).json({ error: "Security check failed" });
   }
-}
-
-
-  } catch (error) {
-    return res.status(500).json({ error: "Security check failed" });
-  }
-}
+};
