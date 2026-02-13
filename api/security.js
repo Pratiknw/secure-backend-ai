@@ -1,13 +1,23 @@
-module.exports = async function handler(req, res) {
+const requestCounts = {};
 
-  // 🔥 Basic WAF Layer
+module.exports = async function handler(req, res) {
 
   const ip = req.headers["x-forwarded-for"] || "unknown";
   const hasAuth = !!req.headers.authorization;
   const userAgent = req.headers["user-agent"] || "";
   const requestBody = JSON.stringify(req.body || {});
 
-  // 🚫 Rule 1: Block missing authorization
+  // 🔥 Rate Limiting (Max 5 requests per IP)
+  requestCounts[ip] = (requestCounts[ip] || 0) + 1;
+
+  if (requestCounts[ip] > 5) {
+    return res.status(429).json({
+      firewall: "BLOCKED",
+      reason: "Rate limit exceeded"
+    });
+  }
+
+  // 🚫 Missing Authorization
   if (!hasAuth) {
     return res.status(403).json({
       firewall: "BLOCKED",
@@ -15,7 +25,7 @@ module.exports = async function handler(req, res) {
     });
   }
 
-  // 🚫 Rule 2: Block suspicious SQL injection patterns
+  // 🚫 SQL Injection Detection
   if (requestBody.includes("SELECT") || requestBody.includes("DROP") || requestBody.includes("' OR")) {
     return res.status(403).json({
       firewall: "BLOCKED",
@@ -23,7 +33,7 @@ module.exports = async function handler(req, res) {
     });
   }
 
-  // 🚫 Rule 3: Block suspicious user agents
+  // 🚫 Suspicious User-Agent
   if (userAgent.toLowerCase().includes("bot") || userAgent.toLowerCase().includes("curl")) {
     return res.status(403).json({
       firewall: "BLOCKED",
@@ -31,7 +41,6 @@ module.exports = async function handler(req, res) {
     });
   }
 
-  // ✅ If passed WAF
   return res.status(200).json({
     firewall: "PASSED",
     message: "Request allowed by WAF"
