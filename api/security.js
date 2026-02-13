@@ -81,8 +81,12 @@ module.exports = async function handler(req, res) {
     });
 
   } catch (error) {
-    return res.status(500).json({
-      error: "AI analysis failed"
-    });
-  }
+  console.log("OPENAI ERROR:", error.response?.data || error.message);
+
+  return res.status(500).json({
+    error: "AI analysis failed",
+    details: error.response?.data || error.message
+  });
+}
+
 };
