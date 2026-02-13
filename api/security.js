@@ -34,8 +34,12 @@ module.exports = async function handler(req, res) {
       decision: decision
     });
 
-  } catch (error) {
-    console.error(error);
-    return res.status(500).json({ error: "Security check failed" });
-  }
+ } catch (error) {
+  console.log("ERROR DETAILS:", error.response?.data || error.message);
+  return res.status(500).json({ 
+    error: "Security check failed",
+    details: error.response?.data || error.message
+  });
+}
+
 };
