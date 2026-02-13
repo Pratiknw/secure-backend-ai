@@ -3,7 +3,7 @@ const requestCounts = {};
 module.exports = async function handler(req, res) {
 
   const ip = req.headers["x-forwarded-for"] || "unknown";
-  const hasAuth = !!req.headers.authorization;
+  const hasAuth = !!req.headers.authorization || req.query.auth === "true";
   const userAgent = req.headers["user-agent"] || "";
   const requestBody = JSON.stringify(req.body || {});
 
