@@ -12,16 +12,18 @@ module.exports = async function handler(req, res) {
     };
 
     const beakResponse = await axios.post(
-      "https://YOUR_BEAK_ENDPOINT",
-      {
-        message: `Analyze this request and decide ALLOW, REVIEW, or BLOCK:\n${JSON.stringify(metadata)}`
-      },
-      {
-        headers: {
-          Authorization: `Bearer ${process.env.BEAK_API_KEY}`
-        }
-      }
-    );
+  process.env.BEAK_ENDPOINT,   // we will set this in Vercel
+  {
+    message: `Analyze this request and decide ALLOW, REVIEW, or BLOCK:\n${JSON.stringify(metadata)}`
+  },
+  {
+    headers: {
+      "gAAAAABpjr4jyTR5ASd6VvHbbKYzwSpCiaRBuGZqVCE3uC0RxPOKJnUH93hcVGDYOxL6pBx3ldrX8hIJRFf3C6EkBEWcP5B_1Q==":
+      "gAAAAABpjr4j-dGZj56SZruxe7GITHkd063L-3cfsCaSHtWWAr6eRu4DvaaH2a9UO8l-SjDCt9r2Qy6avSDZ3JAWCSCCimkujfmCUiuVo9gC1Mv41oHHyj9ZzkPVBIhqoGkxyRe22vSA-516DuuogvA-mSyDb5JBmDQmsEzufDgXpvqk1GzTI_MxbItxBoTwpZ_b7hQZlftAA31m5JdRncv6GcmcrnJq7JINrdZXH60XncagJQZEkvtCpEOj11XlXKUwC9gADXUoOsYBdFvYlC7-GbTtZs0VWw=="
+    }
+  }
+);
+
 
     const decision = beakResponse.data.action || "ALLOW";
 
