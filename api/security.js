@@ -5,7 +5,7 @@ module.exports = async function handler(req, res) {
   const ip = req.headers["x-forwarded-for"] || "unknown";
   const hasAuth = !!req.headers.authorization || req.query.auth === "true";
   const userAgent = req.headers["user-agent"] || "";
-  const requestBody = JSON.stringify(req.body || {});
+  const requestBody = JSON.stringify(req.body || {}) + JSON.stringify(req.query || {});
 
   // 🔥 Rate Limiting (Max 5 requests per IP)
   requestCounts[ip] = (requestCounts[ip] || 0) + 1;
